@@ -1,0 +1,91 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "58acfbe1-32b3-4d3c-b64c-23f2bed2c42b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import streamlit as st\n",
+    "import pandas as pd\n",
+    "import matplotlib.pyplot as plt\n",
+    "import seaborn as sns\n",
+    "import matplotlib.font_manager as font_manager\n",
+    "import matplotlib as mpl\n",
+    "\n",
+    "# 🔤 한글 폰트 설정\n",
+    "font_path = \"C:/Windows/Fonts/malgun.ttf\"\n",
+    "font_prop = font_manager.FontProperties(fname=font_path)\n",
+    "plt.rcParams['font.family'] = font_prop.get_name()\n",
+    "mpl.rcParams['axes.unicode_minus'] = False\n",
+    "\n",
+    "# 📌 데이터 불러오기 또는 직접 선언\n",
+    "# df = pd.read_sql(\"SELECT * FROM bestsellers\", con=engine)\n",
+    "# 지금은 예시니까 df가 있다고 가정\n",
+    "\n",
+    "# 👉 리뷰개수 전처리\n",
+    "df['리뷰개수'] = df['리뷰개수'].astype(str).str.extract(r'(\\d+)')\n",
+    "df['리뷰개수'] = pd.to_numeric(df['리뷰개수'], errors='coerce')\n",
+    "\n",
+    "# 👉 리뷰점수 전처리\n",
+    "df['리뷰점수'] = pd.to_numeric(df['리뷰점수'], errors='coerce')\n",
+    "df_filtered = df[df['리뷰점수'] > 0]\n",
+    "\n",
+    "# ---------------------------\n",
+    "# 🌐 Streamlit 시작\n",
+    "# ---------------------------\n",
+    "\n",
+    "st.set_page_config(page_title=\"베스트셀러 대시보드\", layout=\"wide\")\n",
+    "st.title(\"📚 교보문고 베스트셀러 시각화\")\n",
+    "\n",
+    "st.header(\"1. 책별 리뷰 점수 (0점 제외)\")\n",
+    "fig1, ax1 = plt.subplots(figsize=(8, 6))\n",
+    "sns.barplot(data=df_filtered, y='제목', x='리뷰점수', orient='h', ax=ax1)\n",
+    "ax1.set_title('책별 리뷰점수 (0 제외)', fontproperties=font_prop)\n",
+    "ax1.set_xlabel('점수')\n",
+    "ax1.set_ylabel('')\n",
+    "st.pyplot(fig1)\n",
+    "\n",
+    "st.header(\"2. 출판사별 베스트셀러 수\")\n",
+    "fig2, ax2 = plt.subplots(figsize=(8, 5))\n",
+    "sns.countplot(data=df, y='출판사', order=df['출판사'].value_counts().index, ax=ax2)\n",
+    "ax2.set_title('출판사별 베스트셀러 수', fontproperties=font_prop)\n",
+    "ax2.set_xlabel('빈도수', fontproperties=font_prop)\n",
+    "max_val = df['출판사'].value_counts().max()\n",
+    "ax2.set_xticks(range(0, max_val+2, 1))\n",
+    "st.pyplot(fig2)\n",
+    "\n",
+    "st.header(\"3. 리뷰 수 Top 5 책\")\n",
+    "top5_reviews = df.sort_values(by='리뷰개수', ascending=False).head(5)\n",
+    "fig3, ax3 = plt.subplots(figsize=(10, 6))\n",
+    "sns.barplot(data=top5_reviews, y='제목', x='리뷰개수', hue='제목', palette='Set2', legend=False, ax=ax3)\n",
+    "ax3.set_title('리뷰 수 Top 5 책', fontproperties=font_prop)\n",
+    "ax3.set_xlabel('')\n",
+    "ax3.set_ylabel('')\n",
+    "st.pyplot(fig3)"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.12.7"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
